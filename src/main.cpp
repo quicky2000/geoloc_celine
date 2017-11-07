@@ -310,6 +310,7 @@ int main(int argc,char ** argv)
       double l_lon_min = std::numeric_limits<double>::max();
       double l_lon_max = std::numeric_limits<double>::min();
       unsigned int l_line_number = 1;
+      std::set<std::string> l_ignored_cities = {"","Ville","Ouessant","Île-de-Sein","Île-Molène"};
       while(!l_file.eof())
       {
           std::getline(l_file,l_line);
@@ -348,7 +349,7 @@ int main(int argc,char ** argv)
                   ++l_pos;
               }while(l_index < 7 && std::string::npos != l_pos);
               // Corsica cities have no name
-              if("" != l_name && "Ville" != l_name && "Ouessant" != l_name && "Île-de-Sein" != l_name && "Île-Molène" != l_name)
+              if(l_ignored_cities.end() == l_ignored_cities.find(l_name))
               {
                   l_cities.insert(std::map<unsigned int,city>::value_type(l_line_number,city(l_line_number,l_name,l_lon,l_lat)));
                   if(l_lat < l_lat_min)
