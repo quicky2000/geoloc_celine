@@ -4,7 +4,8 @@ project(geoloc_celine)
 set(CMAKE_CXX_STANDARD 11)
 
 set(MY_SOURCE_FILES
-    src/main.cpp)
+    include/projections.h
+   )
 
 # List header directories in project
 set(MY_INCLUDE_DIRECTORIES
