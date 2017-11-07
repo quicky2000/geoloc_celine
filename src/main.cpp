@@ -18,8 +18,9 @@
 #include "my_bmp.h"
 #include "quicky_exception.h"
 #include "simple_gui.h"
-#include "unistd.h"
 #include "projections.h"
+#include "city.h"
+#include <unistd.h>
 #include <math.h>
 #include <iostream>
 #include <string>
@@ -134,6 +135,7 @@ void get_x_y(const double & p_lat,
     }
 }
 
+//------------------------------------------------------------------------------
 void draw_cross(unsigned int p_x,
                 unsigned int p_y,
                 int p_size,
@@ -302,11 +304,12 @@ int main(int argc,char ** argv)
           throw quicky_exception::quicky_runtime_exception("Unable to open "+l_csv_file,__LINE__,__FILE__);
       }
       std::string l_line;
-      std::map<std::string,std::pair<double,double> > l_cities;
+      std::map<unsigned int,city> l_cities;
       double l_lat_min = std::numeric_limits<double>::max();
       double l_lat_max = std::numeric_limits<double>::min();
       double l_lon_min = std::numeric_limits<double>::max();
       double l_lon_max = std::numeric_limits<double>::min();
+      unsigned int l_line_number = 1;
       while(!l_file.eof())
       {
           std::getline(l_file,l_line);
@@ -347,14 +350,7 @@ int main(int argc,char ** argv)
               // Corsica cities have no name
               if("" != l_name && "Ville" != l_name && "Ouessant" != l_name && "Île-de-Sein" != l_name && "Île-Molène" != l_name)
               {
-                  l_cities.insert(std::map<std::string, std::pair<double, double> >::value_type(l_name,
-                                                                                                std::pair<double,
-                                                                                                          double
-                                                                                                         >(l_lon,
-                                                                                                           l_lat
-                                                                                                          )
-                                                                                               )
-                                 );
+                  l_cities.insert(std::map<unsigned int,city>::value_type(l_line_number,city(l_line_number,l_name,l_lon,l_lat)));
                   if(l_lat < l_lat_min)
                   {
                       l_lat_min = l_lat;
@@ -372,6 +368,7 @@ int main(int argc,char ** argv)
                       l_lon_max = l_lon;
                   }
               }
+              ++l_line_number;
           }
       }
       l_file.close();
@@ -388,8 +385,8 @@ int main(int argc,char ** argv)
 
       for(auto l_iter:l_cities)
       {
-          double l_lon = l_iter.second.first;
-          double l_lat = l_iter.second.second;
+          double l_lon = l_iter.second.get_lon();
+          double l_lat = l_iter.second.get_lat();
           double l_lambert_lon;
           double l_lambert_lat;
 #if 1
@@ -422,8 +419,8 @@ int main(int argc,char ** argv)
 
       for(auto l_iter:l_cities)
       {
-          double l_lon = l_iter.second.first;
-          double l_lat = l_iter.second.second;
+          double l_lon = l_iter.second.get_lon();
+          double l_lat = l_iter.second.get_lat();
           double l_dx;
           double l_dy;
 #if 0

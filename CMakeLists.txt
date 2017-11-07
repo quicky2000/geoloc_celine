@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(MY_SOURCE_FILES
     include/projections.h
+    include/city.h
    )
 
 # List header directories in project
