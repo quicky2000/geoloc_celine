@@ -249,8 +249,8 @@ int main(int argc,char ** argv)
                 }
             }
           l_line_x_min_max.insert(std::map<unsigned int,std::pair<unsigned int,unsigned int> >::value_type(l_y,std::pair<unsigned int,unsigned int>(l_line_x_min,l_line_x_max)));
-          l_gui.refresh();
         }
+      l_gui.refresh();
       l_simple_bmp.save(l_simple_map);
       std::cout << "Nb colors : " << l_colors.size() << std::endl;
       std::cout << "Min x = " << l_min_pix_x << std::endl;
@@ -313,7 +313,44 @@ int main(int argc,char ** argv)
       double l_lon_min = std::numeric_limits<double>::max();
       double l_lon_max = std::numeric_limits<double>::min();
       unsigned int l_line_number = 1;
-      std::set<std::string> l_ignored_cities = {"","Ville","Ouessant","Île-de-Sein","Île-Molène"};
+      std::set<std::string> l_ignored_cities =
+              {
+                      "",
+                      "Ville",
+                      "Ouessant",
+                      "Île-de-Sein",
+                      "Île-Molène",
+                      "Locmaria",
+                      "Sainte-Marie-de-Ré",
+                      "Couarde-sur-Mer",
+                      "Groix",
+                      "Île-d'Yeu",
+                      "Grand-Village-Plage",
+                      "Saint-Martin-de-Ré",
+                      "Saint-Georges-d'Oléron",
+                      "Saint-Clément-des-Baleines",
+                      "Palais",
+                      "Bois-Plage-en-Ré",
+                      "Sauzon",
+                      "Noirmoutier-en-l'Île",
+                      "Bangor",
+                      "Île-de-Batz",
+                      "Ars-en-Ré",
+                      "Flotte",
+                      "Île-d'Houat",
+                      "Saint-Pierre-d'Oléron",
+                      "Saint-Denis-d'Oléron",
+                      "Loix",
+                      "Brée-les-Bains",
+                      "Dolus-d'Oléron",
+                      "Guérinière",
+                      "Hoedic",
+                      "Portes-en-Ré"
+              };
+      std::set<unsigned int> l_ignored_lines =
+              {
+                      16587 // Épine
+              };
       while(!l_file.eof())
       {
           std::getline(l_file,l_line);
@@ -352,7 +389,7 @@ int main(int argc,char ** argv)
                   ++l_pos;
               }while(l_index < 7 && std::string::npos != l_pos);
               // Corsica cities have no name
-              if(l_ignored_cities.end() == l_ignored_cities.find(l_name))
+              if(l_ignored_cities.end() == l_ignored_cities.find(l_name) && !l_ignored_lines.count(l_line_number))
               {
                   l_cities.insert(std::map<unsigned int,city>::value_type(l_line_number,city(l_line_number,l_name,l_lon,l_lat)));
                   if(l_lat < l_lat_min)
