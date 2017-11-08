@@ -30,7 +30,7 @@
 #include <vector>
 #include <limits>
 
-//#define LAMBERT_PROJECTION
+#define LAMBERT_PROJECTION
 #define LAMBERT2_PROJECTION
 
 //------------------------------------------------------------------------------
@@ -424,6 +424,7 @@ int main(int argc,char ** argv)
       double l_lambert_lon_min = std::numeric_limits<double>::max();
       double l_lambert_lon_max = std::numeric_limits<double>::min();
 
+      std::map<unsigned int,std::pair<double,double> > l_line_lon_min_max;
       for(auto l_iter:l_cities)
       {
           double l_lon = l_iter.second.get_lon();
@@ -450,6 +451,23 @@ int main(int argc,char ** argv)
           if(l_lambert_lon > l_lambert_lon_max)
           {
               l_lambert_lon_max = l_lambert_lon;
+          }
+          unsigned int l_y = get_pixel_coordinate(l_lat_max,l_lat_min,l_min_pix_y,l_max_pix_y,l_lat);
+          std::map<unsigned int,std::pair<double,double> >::iterator l_iter_lon = l_line_lon_min_max.find(l_y);
+          if(l_line_lon_min_max.end() != l_iter_lon)
+          {
+              if(l_lon < l_iter_lon->second.first)
+              {
+                  l_iter_lon->second.first = l_lon;
+              }
+              if(l_lon > l_iter_lon->second.second)
+              {
+                  l_iter_lon->second.second = l_lon;
+              }
+          }
+          else
+          {
+              l_line_lon_min_max.insert(std::map<unsigned int,std::pair<double,double> >::value_type(l_y,std::pair<double,double>(l_lon,l_lon)));
           }
       }
 
@@ -478,17 +496,26 @@ int main(int argc,char ** argv)
           unsigned int l_x = get_pixel_coordinate(l_lambert_lon_min,l_lambert_lon_max,l_min_pix_x,l_max_pix_x,l_dx);
 #else
           unsigned int l_y = get_pixel_coordinate(l_lat_max,l_lat_min,l_min_pix_y,l_max_pix_y,l_lat);
-//          auto l_iter_min_max = l_line_x_min_max.find(l_y);
-//          assert(l_line_x_min_max.end() != l_iter_min_max);
-//          l_min_pix_x = l_iter_min_max->second.first;
-//          l_max_pix_x = l_iter_min_max->second.second;
+#if 0
+          auto l_iter_min_max = l_line_x_min_max.find(l_y);
+          assert(l_line_x_min_max.end() != l_iter_min_max);
+          l_min_pix_x = l_iter_min_max->second.first;
+          l_max_pix_x = l_iter_min_max->second.second;
+          auto l_iter_lon_min_max = l_line_lon_min_max.find(l_y);
+          assert(l_line_lon_min_max.end() != l_iter_lon_min_max);
+          l_lon_min = l_iter_lon_min_max->second.first;
+          l_lon_max = l_iter_lon_min_max->second.second;
+#endif
           unsigned int l_x = get_pixel_coordinate(l_lon_min,l_lon_max,l_min_pix_x,l_max_pix_x,l_lon);
 #endif
-//          uint32_t l_color_code = l_gui.get_pixel(l_x,l_y);
-//          assert(l_color_code != l_gui.get_color_code(0,0,0));
-
-          unsigned int l_blue = l_gui.get_color_code(0, 0, 255);
-          l_gui.set_pixel_without_lock(l_x,l_y,l_blue);
+          unsigned int l_blue = l_gui.get_color_code(0,
+                                                     0,
+                                                     255
+                                                    );
+          l_gui.set_pixel_without_lock(l_x,
+                                       l_y,
+                                       l_blue
+                                      );
       }
       l_gui.refresh();
       sleep(100);
