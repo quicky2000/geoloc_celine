@@ -30,6 +30,7 @@
 #include <map>
 #include <vector>
 #include <limits>
+#include <sstream>
 
 #define MIXED_PROJECTION
 #define LAMBERT2_PROJECTION
@@ -236,6 +237,14 @@ int main(int argc,char ** argv)
       l_simple_colors.push_back(lib_bmp::my_color(255,255,0));
       l_simple_colors.push_back(lib_bmp::my_color(204,255,204));
       l_simple_colors.push_back(lib_bmp::my_color(102,153,0));
+
+      std::map<lib_bmp::my_color,std::string> l_legend;
+      l_legend.insert(std::map<lib_bmp::my_color,std::string>::value_type(lib_bmp::my_color(255,0,0),"> 25 q/ha"));
+      l_legend.insert(std::map<lib_bmp::my_color,std::string>::value_type(lib_bmp::my_color(255,153,51),"20-25 q/ha"));
+      l_legend.insert(std::map<lib_bmp::my_color,std::string>::value_type(lib_bmp::my_color(255,255,0),"15-20 q/ha"));
+      l_legend.insert(std::map<lib_bmp::my_color,std::string>::value_type(lib_bmp::my_color(204,255,204),"10-15 q/ha"));
+      l_legend.insert(std::map<lib_bmp::my_color,std::string>::value_type(lib_bmp::my_color(102,153,0),"< 10 q/ha"));
+
       std::set<lib_bmp::my_color> l_colors;
 
       // Store min max values of pixel x,y not white
@@ -317,6 +326,7 @@ int main(int argc,char ** argv)
       std::cout << "Min y = " << l_min_pix_y << std::endl;
       std::cout << "Max y = " << l_max_pix_y << std::endl;
 
+#if 0
 //      unsigned int l_x= get_pixel_coordinate(l_lochrist_lon, l_bray_dunes_lon, l_lochrist_x, l_bray_dunes_x,l_bray_dunes_lon);
 //      std::cout << "l_x = " << l_x << std::endl;
       unsigned int l_x;
@@ -357,6 +367,7 @@ int main(int argc,char ** argv)
           l_gui.set_pixel_without_lock(l_x_feurs,l_y_feurs + l_offset,l_red_code);
           l_gui.refresh();
       }
+#endif
 
       std::string l_csv_file("liste_villes_2017.csv");
       std::ifstream l_file;
@@ -628,7 +639,15 @@ int main(int argc,char ** argv)
           uint8_t l_G;
           uint8_t l_B;
           l_gui.get_RGB_code(l_color_code,l_R,l_G,l_B);
-          l_csv_generator.add_city(l_iter.second,l_R,l_G,l_B,"Legende");
+          lib_bmp::my_color l_pixel_bmp_color(l_R,l_G,l_B);
+          std::map<lib_bmp::my_color,std::string>::const_iterator l_legend_iter = l_legend.find(l_pixel_bmp_color);
+          if(l_legend.end() == l_legend_iter)
+          {
+              std::stringstream l_color_stream;
+              l_color_stream << l_pixel_bmp_color;
+              throw quicky_exception::quicky_logic_exception("No legend for color " + l_color_stream.str(),__LINE__,__FILE__);
+          }
+          l_csv_generator.add_city(l_iter.second,l_R,l_G,l_B,l_legend_iter->second);
 
 #if 0
           l_gui.set_pixel_without_lock(l_x,
