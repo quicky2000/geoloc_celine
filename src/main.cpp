@@ -20,6 +20,7 @@
 #include "simple_gui.h"
 #include "projections.h"
 #include "city.h"
+#include "generate_csv.h"
 #include <unistd.h>
 #include <math.h>
 #include <iostream>
@@ -546,6 +547,7 @@ int main(int argc,char ** argv)
       std::cout << "Lambert Min lat = " << l_lambert_lat_min << std::endl;
       std::cout << "Lambert Max lat = " << l_lambert_lat_max << std::endl;
 
+      generate_csv l_csv_generator("result.csv");
       for(auto l_iter:l_cities)
       {
           double l_lon = l_iter.second.get_lon();
@@ -556,6 +558,19 @@ int main(int argc,char ** argv)
           WGS84ToLambert2e(l_lon,l_lat,l_dx,l_dy);
           unsigned int l_y = get_pixel_coordinate(l_lat_max,l_lat_min,l_min_pix_y,l_max_pix_y,l_lat);
           unsigned int l_x = get_pixel_coordinate(l_lambert_lon_min,l_lambert_lon_max,l_min_pix_x,l_max_pix_x,l_dx);
+//          if(l_y < 53)
+//          {
+//              l_x = l_x - 1;
+//          }
+//          else if(l_y < 90)
+//          {
+//              l_x = l_x - 2;
+//          }
+//          else if(l_x > 309 && l_y < 140)
+//          {
+//              l_x += 50;
+//              l_y = l_y - 50;
+//          }
 #elif defined LAMBERT_PROJECTION
 #ifdef LAMBERT2_PROJECTION
           WGS84ToLambert2e(l_lon,l_lat,l_dx,l_dy);
@@ -608,24 +623,22 @@ int main(int argc,char ** argv)
                   }
                   ++l_size;
               }
-              uint8_t l_R;
-              uint8_t l_G;
-              uint8_t l_B;
-              l_gui.get_RGB_code(l_color_code,l_R,l_G,l_B);
-#if 0
-              l_gui.set_pixel_without_lock(l_x,
-                                           l_y,
-                                           l_outside ? l_gui.get_color_code(l_R/2,l_G/2,l_B/2) : l_blue
-                                          );
-#endif
           }
+          uint8_t l_R;
+          uint8_t l_G;
+          uint8_t l_B;
+          l_gui.get_RGB_code(l_color_code,l_R,l_G,l_B);
+          l_csv_generator.add_city(l_iter.second,l_R,l_G,l_B,"Legende");
+
+#if 0
           l_gui.set_pixel_without_lock(l_x,
                                        l_y,
-                                       l_outside ? l_red_code : l_blue
+                                       l_outside ? l_gui.get_color_code(l_R/2,l_G/2,l_B/2) : l_color_code
                                       );
+#endif
       }
       l_gui.refresh();
-      sleep(100);
+      sleep(1);
 
   }
   catch(quicky_exception::quicky_runtime_exception & e)
