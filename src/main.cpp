@@ -30,7 +30,7 @@
 #include <vector>
 #include <limits>
 
-#define LAMBERT_PROJECTION
+#define MIXED_PROJECTION
 #define LAMBERT2_PROJECTION
 
 //------------------------------------------------------------------------------
@@ -482,7 +482,11 @@ int main(int argc,char ** argv)
           double l_lat = l_iter.second.get_lat();
           double l_dx;
           double l_dy;
-#ifdef LAMBERT_PROJECTION
+#ifdef MIXED_PROJECTION
+          WGS84ToLambert2e(l_lon,l_lat,l_dx,l_dy);
+          unsigned int l_y = get_pixel_coordinate(l_lat_max,l_lat_min,l_min_pix_y,l_max_pix_y,l_lat);
+          unsigned int l_x = get_pixel_coordinate(l_lambert_lon_min,l_lambert_lon_max,l_min_pix_x,l_max_pix_x,l_dx);
+#elif defined LAMBERT_PROJECTION
 #ifdef LAMBERT2_PROJECTION
           WGS84ToLambert2e(l_lon,l_lat,l_dx,l_dy);
 #else
