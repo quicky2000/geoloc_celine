@@ -590,8 +590,8 @@ int main(int argc,char ** argv)
                                                       0,
                                                       0
                                                       );
-          unsigned int l_color_code;
-          bool l_outside = is_outside(l_gui,l_x,l_y,l_color_code,l_black);
+          uint32_t l_color_code;
+          bool l_outside = is_outside(l_gui,l_x,l_y,l_black,l_color_code);
           if(l_outside)
           {
               // Search nearest coloured pixel
