@@ -157,6 +157,64 @@ void draw_cross(unsigned int p_x,
 
 }
 
+
+/**
+ *
+ * @param p_gui GUI object
+ * @param p_x pixel coordinate
+ * @param p_y pixel coordinate
+ * @param p_outside_color_code color code of outside
+ * @param p_color_code color of pixel
+ * @return true if pixel is black
+ */
+bool is_outside(const simple_gui::simple_gui & p_gui,
+                const unsigned int p_x,
+                const unsigned int p_y,
+                uint32_t p_outside_color_code,
+                uint32_t & p_color_code
+               )
+{
+    return (p_color_code = p_gui.get_pixel(p_x,p_y)) == p_outside_color_code;
+}
+
+/**
+ * Check if pixel of coordinate (p_x,p_y) is outside. if not compare its
+ * distance to reference pixel of coordinate (p_ref_x, p_ref_x )
+ * if distance is less than p_distance then p_distance than update
+ * p_distance and p_color_code
+ * @param p_gui GUI object
+ * @param p_x x coordinate of pixel to check
+ * @param p_y y coordinate of pixel to check
+ * @param p_ref_x x coordinate of reference pixel
+ * @param p_ref_y y coordinate of reference pixel
+ * @param p_distance minimum distance found up to now
+ * @param p_outside_color_code color code of outside aera
+ * @param p_color_code color code of pixel in case distance is less than ref distance
+ * @return true if pixel not outside was found
+ */
+bool check_pixel(const simple_gui::simple_gui & p_gui,
+                 const unsigned int p_x,
+                 const unsigned int p_y,
+                 const unsigned int p_ref_x,
+                 const unsigned int p_ref_y,
+                 unsigned int & p_distance,
+                 uint32_t p_outside_color_code,
+                 uint32_t & p_color_code
+                )
+{
+    uint32_t l_color_code;
+    if(!is_outside(p_gui,p_x,p_y,p_outside_color_code,l_color_code))
+    {
+        unsigned int l_distance = (unsigned int)(pow(((double)p_x - ((double)p_ref_x)) ,2) + pow(((double)p_y - ((double)p_ref_y)),2));
+        if(l_distance < p_distance)
+        {
+            p_distance = l_distance;
+            p_color_code = l_color_code;
+        }
+        return true;
+    }
+    return false;
+}
 //------------------------------------------------------------------------------
 int main(int argc,char ** argv)
 {
@@ -516,9 +574,42 @@ int main(int argc,char ** argv)
                                                      0,
                                                      255
                                                     );
+          unsigned int l_black = l_gui.get_color_code(0,
+                                                      0,
+                                                      0
+                                                      );
+          unsigned int l_color_code;
+          bool l_outside = is_outside(l_gui,l_x,l_y,l_color_code,l_black);
+          if(l_outside)
+          {
+              // Search nearest coloured pixel
+              bool l_found = false;
+              unsigned int l_size = 1;
+              unsigned int l_distance = std::numeric_limits<unsigned int>::max();
+              while(!l_found)
+              {
+                  for(int l_offset = -((int)l_size);
+                          l_offset < (int)l_size;
+                          ++l_offset)
+                  {
+                    l_found |= check_pixel(l_gui,l_x + l_offset, l_y, l_x, l_y, l_distance,l_black,l_color_code);
+                  }
+                  ++l_size;
+              }
+              uint8_t l_R;
+              uint8_t l_G;
+              uint8_t l_B;
+              l_gui.get_RGB_code(l_color_code,l_R,l_G,l_B);
+#if 0
+              l_gui.set_pixel_without_lock(l_x,
+                                           l_y,
+                                           l_outside ? l_gui.get_color_code(l_R/2,l_G/2,l_B/2) : l_blue
+                                          );
+#endif
+          }
           l_gui.set_pixel_without_lock(l_x,
                                        l_y,
-                                       l_blue
+                                       l_outside ? l_red_code : l_blue
                                       );
       }
       l_gui.refresh();
