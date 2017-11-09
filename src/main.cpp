@@ -220,8 +220,8 @@ int main(int argc,char ** argv)
 {
   try
   {
-      std::string l_map = "map_without_legend.bmp";
-      std::string l_simple_map = "simple_map.bmp";
+      std::string l_map = "simple_map.bmp";
+      std::string l_simple_map = "out_simple_map.bmp";
       lib_bmp::my_bmp l_bmp(l_map);
       lib_bmp::my_bmp l_simple_bmp(l_bmp.get_width(),l_bmp.get_height(),24);
       simple_gui::simple_gui l_gui;
