@@ -417,6 +417,9 @@ int main(int argc,char ** argv)
               size_t l_pos = 0;
               size_t l_previous_pos = 0;
               std::string l_name;
+              std::string l_postal_code;
+              std::string l_city_code;
+              std::string l_department;
               double l_lat;
               double l_lon;
               unsigned int l_index = 0;
@@ -427,6 +430,12 @@ int main(int argc,char ** argv)
                   std::string l_substring(l_line.substr(l_previous_pos, l_pos - l_previous_pos));
                   switch(l_index)
                   {
+                      case 0:
+                          l_city_code = l_substring;
+                          break;
+                      case 1:
+                          l_postal_code = l_substring;
+                          break;
                       case 2:
                           l_name = l_substring;
                           break;
@@ -442,14 +451,17 @@ int main(int argc,char ** argv)
                               l_lon = std::stod(l_substring);
                           }
                           break;
+                      case 9:
+                          l_department = l_substring;
+                          break;
                   }
                   ++l_index;
                   ++l_pos;
-              }while(l_index < 7 && std::string::npos != l_pos);
+              }while(l_index < 10 && std::string::npos != l_pos);
               // Corsica cities have no name
               if(l_ignored_cities.end() == l_ignored_cities.find(l_name) && !l_ignored_lines.count(l_line_number))
               {
-                  l_cities.insert(std::map<unsigned int,city>::value_type(l_line_number,city(l_line_number,l_name,l_lon,l_lat)));
+                  l_cities.insert(std::map<unsigned int,city>::value_type(l_line_number,city(l_line_number,l_name,l_lon,l_lat,l_postal_code,l_city_code,l_department)));
                   if(l_lat < l_lat_min)
                   {
                       l_lat_min = l_lat;
